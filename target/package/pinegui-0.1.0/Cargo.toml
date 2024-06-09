@@ -13,6 +13,10 @@
 edition = "2021"
 name = "pinegui"
 version = "0.1.0"
+authors = ["za-songguo <zasongguo@outlook.com>"]
+description = "An Rust embedded GUI library."
+license = "MIT"
+repository = "https://github.com/za-songguo/pinegui"
 resolver = "1"
 
 [dependencies.embedded-graphics]
