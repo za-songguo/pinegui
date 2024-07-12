@@ -1,2 +1,3 @@
 [workspace]
-members = ["pinegui"]
+members = ["demo", "pinegui", "pinegui-platform"]
+resolver = "2"
