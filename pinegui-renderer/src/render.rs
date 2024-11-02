@@ -8,6 +8,19 @@ use embedded_graphics::{
 
 extern crate alloc;
 
+// // 定义一个标记 trait `Render2`
+// pub trait Render2<T>: dyn_clone::DynClone + Dimensions + Send + fmt::Debug + Drawable
+// where
+//     T: DrawTarget,
+// {
+// }
+
+// // 使用标记 trait 的具体实现
+// impl<C: PixelColor, T: DrawTarget<Color = C>, D> Render2<T> for D where
+//     D: Drawable<Color = C> + Dimensions + Clone + PartialEq + 'static + Send + fmt::Debug
+// {
+// }
+
 // pub trait Render<T: DrawTarget>: Send + Sync + DynClone {
 // TODO why Dimensions trait is needed here?
 pub trait Render<T>: dyn_clone::DynClone + Dimensions + Send + fmt::Debug
