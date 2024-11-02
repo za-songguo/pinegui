@@ -1,3 +1,10 @@
 [workspace]
-members = ["demo", "pinegui", "pinegui-platform"]
+members = [
+    "demo",
+    "pinegui", "pinegui-event",
+    "pinegui-layout",
+    "pinegui-platform",
+    "pinegui-renderer",
+    "pinegui-style",
+]
 resolver = "2"

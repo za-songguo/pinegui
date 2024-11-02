@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 fugit = "0.3.7"
+critical-section = "1.1.2"
+embassy-sync = "0.6.0"
+spin = "0.9.8"

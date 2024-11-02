@@ -5,7 +5,6 @@ pub use pinegui_renderer;
 
 pub mod component;
 pub mod elememt;
-pub mod node;
-pub mod shared;
+pub mod id;
 pub mod state;
 pub mod ui;

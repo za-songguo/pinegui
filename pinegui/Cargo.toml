@@ -4,9 +4,24 @@ version = "0.1.0"
 edition = "2021"
 authors = ["za-songguo <zasongguo@outlook.com>"]
 license = "MIT"
-description = "An Rust embedded GUI library."
+description = "A Rust embedded GUI library."
 repository = "https://github.com/za-songguo/pinegui"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dyn-clone = "1.0.17"
+dyn_ord = "0.2.1"
 embedded-graphics = "0.8.1"
+critical-section = "1.1.2"
+
+pinegui-renderer = { path = "../pinegui-renderer" }
+pinegui-event = { path = "../pinegui-event" }
+
+
+[dev-dependencies]
+critical-section = { version = "1.1.2", features = ["std"]}
+
+[features]
+default = ["use_arc"]
+use_rc = []
+use_arc = []
