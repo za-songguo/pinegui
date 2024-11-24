@@ -4,23 +4,20 @@ use core::fmt;
 
 use alloc::boxed::Box;
 
-use embedded_graphics::{
-    prelude::{Dimensions, DrawTarget},
-    primitives::Rectangle,
-};
+use embedded_graphics::{prelude::Dimensions, primitives::Rectangle};
 use pinegui_event::Event;
 use pinegui_renderer::render::Render;
 
 use crate::shared::Shared;
 
-pub struct Element<T: DrawTarget> {
-    pub content: Box<dyn Render<T>>,
+pub struct Element {
+    pub content: Box<dyn Render>,
     pub event_callback: Shared<Box<dyn Fn(Event) + Send>>,
 }
 
-impl<T: DrawTarget> Element<T> {
+impl Element {
     pub fn new(
-        content: Box<dyn Render<T>>,
+        content: Box<dyn Render>,
         event_callback: Shared<Box<dyn Fn(Event) + Send>>,
     ) -> Self {
         Self {
@@ -29,7 +26,7 @@ impl<T: DrawTarget> Element<T> {
         }
     }
 
-    pub fn set_content(&mut self, content: Box<dyn Render<T>>) -> Self {
+    pub fn set_content(&mut self, content: Box<dyn Render>) -> Self {
         self.content = content;
         self.clone()
     }
@@ -43,13 +40,13 @@ impl<T: DrawTarget> Element<T> {
     }
 }
 
-impl<T: DrawTarget> Dimensions for Element<T> {
+impl Dimensions for Element {
     fn bounding_box(&self) -> Rectangle {
         self.content.bounding_box()
     }
 }
 
-impl<T: DrawTarget> PartialEq for Element<T> {
+impl PartialEq for Element {
     fn eq(&self, other: &Self) -> bool {
         // XXX: Is comparing pointer addresses enough?
         // let callback_is_eq = SmartRc::ptr_eq(
@@ -62,9 +59,9 @@ impl<T: DrawTarget> PartialEq for Element<T> {
     }
 }
 
-impl<T: DrawTarget> Eq for Element<T> {}
+impl Eq for Element {}
 
-impl<T: DrawTarget> Clone for Element<T> {
+impl Clone for Element {
     fn clone(&self) -> Self {
         Self {
             content: self.content.clone(),
@@ -73,7 +70,7 @@ impl<T: DrawTarget> Clone for Element<T> {
     }
 }
 
-impl<T: DrawTarget> fmt::Debug for Element<T> {
+impl fmt::Debug for Element {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Element")
             .field("content", &self.content)

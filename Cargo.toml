@@ -1,6 +1,5 @@
 [workspace]
-members = [
-    "demo",
+members = [ "bench",
     "pinegui", "pinegui-event",
     "pinegui-layout",
     "pinegui-platform",

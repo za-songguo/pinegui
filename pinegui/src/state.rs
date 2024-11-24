@@ -3,16 +3,16 @@ extern crate alloc;
 use core::fmt;
 
 use alloc::vec::Vec;
-use embedded_graphics::prelude::DrawTarget;
+use dyn_ord::DynEq;
 
 use crate::{component::Component, node::Node, shared::Shared};
 
-pub struct State<V, T: DrawTarget> {
+pub struct State<V> {
     value: V,
-    related_comps: Vec<Shared<Node<T>>>,
+    related_comps: Vec<Shared<Node>>,
 }
 
-impl<V: Clone, T: DrawTarget> Clone for State<V, T> {
+impl<V: Clone> Clone for State<V> {
     fn clone(&self) -> Self {
         Self {
             value: self.value.clone(),
@@ -21,7 +21,7 @@ impl<V: Clone, T: DrawTarget> Clone for State<V, T> {
     }
 }
 
-impl<V: fmt::Debug, T: DrawTarget> fmt::Debug for State<V, T> {
+impl<V: fmt::Debug> fmt::Debug for State<V> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("State")
             .field("value", &self.value)
@@ -30,7 +30,7 @@ impl<V: fmt::Debug, T: DrawTarget> fmt::Debug for State<V, T> {
     }
 }
 
-impl<V, T: DrawTarget> State<V, T> {
+impl<V> State<V> {
     /// Create a new state with the given value.
     pub fn new(value: V) -> Shared<Self> {
         Shared::new(Self {
@@ -58,9 +58,9 @@ impl<V, T: DrawTarget> State<V, T> {
     }
 
     /// Get the value of the state and bind the component to the state to trigger re-rendering when the state value changes.
-    pub fn value(&mut self, component: Shared<Node<T>>) -> &V
+    pub fn value(&mut self, component: Shared<Node>) -> &V
     where
-        dyn Component<T>: PartialEq,
+        dyn Component: DynEq,
     {
         // Avoid adding dupicate components.
         if !self.related_comps.contains(&component.clone()) {
@@ -75,25 +75,25 @@ impl<V, T: DrawTarget> State<V, T> {
     pub fn force_rerender_related_comps(&self) {
         self.related_comps
             .iter()
-            .for_each(|c| c.borrow_mut().need_rerender = true); // Because the node is under a `Shared`, the change will be reflected to the corresponding `Node` in `Ui`.
+            .for_each(|c| c.borrow_mut().need_rerender = true); // Because the node is under a `Shared`he change will be reflected to the corresponding `Node` in `Ui`.
     }
 }
 
-impl<V: PartialEq, T: DrawTarget> PartialEq for State<V, T> {
+impl<V: PartialEq> PartialEq for State<V> {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
     }
 }
 
-impl<V: Eq, T: DrawTarget> Eq for State<V, T> {}
+impl<V: Eq> Eq for State<V> {}
 
-impl<V: PartialOrd, T: DrawTarget> PartialOrd for State<V, T> {
+impl<V: PartialOrd> PartialOrd for State<V> {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         self.value.partial_cmp(&other.value)
     }
 }
 
-impl<V: Ord, T: DrawTarget> Ord for State<V, T> {
+impl<V: Ord> Ord for State<V> {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.value.cmp(&other.value)
     }

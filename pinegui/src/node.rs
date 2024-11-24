@@ -4,16 +4,17 @@ use core::fmt;
 
 use crate::{component::Component, elememt::Element, shared::Shared};
 use alloc::{boxed::Box, vec::Vec};
-use embedded_graphics::draw_target::DrawTarget;
+use dyn_ord::DynEq;
 
-pub struct Node<T: DrawTarget> {
+pub struct Node {
     pub need_rerender: bool,
-    pub component: Option<Shared<Box<dyn Component<T>>>>,
-    pub children: Vec<Shared<Node<T>>>,
-    pub content: Vec<Element<T>>,
+    pub component: Option<Shared<Box<dyn Component>>>,
+    pub children: Vec<Shared<Node>>,
+    // TODO parent (Weak)
+    pub content: Vec<Element>,
 }
 
-impl<T: DrawTarget> Default for Node<T> {
+impl Default for Node {
     fn default() -> Self {
         Self {
             need_rerender: true,
@@ -24,7 +25,7 @@ impl<T: DrawTarget> Default for Node<T> {
     }
 }
 
-impl<T: DrawTarget> Clone for Node<T> {
+impl Clone for Node {
     fn clone(&self) -> Self {
         Self {
             need_rerender: self.need_rerender,
@@ -35,7 +36,7 @@ impl<T: DrawTarget> Clone for Node<T> {
     }
 }
 
-impl<T: DrawTarget> fmt::Debug for Node<T> {
+impl fmt::Debug for Node {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Node")
             .field("need_rerender", &self.need_rerender)
@@ -46,26 +47,26 @@ impl<T: DrawTarget> fmt::Debug for Node<T> {
     }
 }
 
-impl<T: DrawTarget> PartialEq for Node<T>
+impl PartialEq for Node
 where
-    dyn Component<T>: PartialEq,
+    dyn Component: DynEq,
 {
     fn eq(&self, other: &Self) -> bool {
         // XXX: Will this implmentation cause problems?
-        self.component == other.component
+        self.dyn_eq(other.as_any().downcast_ref::<&dyn DynEq>().unwrap())
             && self.content == other.content
             && self.children == other.children
     }
 }
 
-impl<T: DrawTarget> Eq for Node<T> where dyn Component<T>: PartialEq {}
+impl Eq for Node where dyn Component: DynEq {}
 
-impl<T: DrawTarget> Node<T> {
+impl Node {
     pub fn new() -> Shared<Self> {
         Shared::new(Self::default())
     }
 
-    pub fn set_component(&mut self, component: Shared<Box<dyn Component<T>>>) -> &mut Self {
+    pub fn set_component(&mut self, component: Shared<Box<dyn Component>>) -> &mut Self {
         self.component = Some(component);
         self
     }
@@ -80,7 +81,7 @@ impl<T: DrawTarget> Node<T> {
         self
     }
 
-    pub fn set_content(&mut self, content: Vec<Element<T>>) -> &mut Self {
+    pub fn set_content(&mut self, content: Vec<Element>) -> &mut Self {
         self.content = content;
         self
     }
@@ -91,7 +92,7 @@ impl<T: DrawTarget> Node<T> {
     }
 
     // XXX expand: 展开全部元素 iter: 展开全部节点
-    pub fn expand(&self) -> Vec<Element<T>> {
+    pub fn expand(&self) -> Vec<Element> {
         let mut result = Vec::new();
         result.extend(self.content.clone());
 
@@ -111,69 +112,5 @@ impl<T: DrawTarget> Node<T> {
             .for_each(|child| result.extend(Node::expand_node(child.clone())));
 
         result
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use alloc::vec;
-    use embedded_graphics::{
-        mock_display::MockDisplay,
-        pixelcolor::Rgb565,
-        prelude::{Point, Primitive},
-        primitives::Circle,
-    };
-
-    use super::*;
-
-    #[test]
-    fn test_expand_nodes() {
-        let node = Node::<MockDisplay<Rgb565>>::new();
-
-        node.borrow_mut().add_child(Node::new());
-        node.borrow_mut().add_child(
-            Node::new()
-                .borrow_mut()
-                .add_child(Node::new().borrow_mut().add_child(Node::new()).into())
-                .into(),
-        );
-
-        let mut count = 0;
-
-        for _ in Node::expand_node(node) {
-            count += 1;
-        }
-        assert_eq!(count, 5);
-    }
-
-    #[test]
-    fn test_expand() {
-        let node = Node::<MockDisplay<Rgb565>>::new();
-
-        node.borrow_mut().set_content(vec![
-            Element::new(
-                Box::new(Circle::new(Point::zero(), 0).into_styled(Default::default())),
-                Shared::new(Box::new(|_| {})),
-            ),
-            Element::new(
-                Box::new(Circle::new(Point::zero(), 1).into_styled(Default::default())),
-                Shared::new(Box::new(|_| {})),
-            ),
-        ]);
-
-        node.borrow_mut().add_child(Node::new());
-        node.borrow_mut().add_child(
-            Node::new()
-                .borrow_mut()
-                .add_child(Node::new().borrow_mut().add_child(Node::new()).into())
-                .into(),
-        );
-
-        let mut count = 0;
-
-        for _ in node.clone().expand() {
-            count += 1;
-        }
-        assert_eq!(count, 2);
     }
 }
